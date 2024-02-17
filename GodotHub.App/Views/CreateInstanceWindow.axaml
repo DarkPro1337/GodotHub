@@ -1,0 +1,105 @@
+﻿<Window 
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:av="clr-namespace:SpacedGridControl.Avalonia;assembly=SpacedGridControl.Avalonia"
+    xmlns:viewModels="clr-namespace:GodotHub.App.ViewModels"
+    xmlns:i="https://github.com/projektanker/icons.avalonia"
+    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+    x:Class="GodotHub.App.Views.CreateInstanceWindow"
+    Title="New Instance" Width="800" Height="650"
+    WindowStartupLocation="CenterOwner" CanResize="False"
+    TransparencyLevelHint="AcrylicBlur"
+    x:DataType="viewModels:CreateInstanceViewModel">
+    <Design.DataContext>
+        <viewModels:CreateInstanceViewModel/>
+    </Design.DataContext>
+    <Panel>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="1"
+                    MaterialOpacity="0" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        
+        <Grid RowDefinitions="Auto, Auto, *, Auto">
+            <DockPanel Margin="18" VerticalAlignment="Top">
+                <Button
+                    Margin="0 0 12 0"
+                    Width="128" Height="128" 
+                    DockPanel.Dock="Left">
+                    <Image Width="88" Height="88" />
+                </Button>
+                <av:SpacedGrid VerticalAlignment="Center" RowSpacing="8" RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="Auto, *">
+                    <TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Text="Name: " />
+                    <TextBox Grid.Column="1" Grid.Row="0" Watermark="Release 4.0" />
+                    <TextBlock Grid.Column="0" Grid.Row="1"  VerticalAlignment="Center" Text="Group: " />
+                    <TextBox Grid.Column="1" Grid.Row="1" Watermark="No group" />
+                    <CheckBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Content="Mono (.NET)" />
+                </av:SpacedGrid>
+            </DockPanel>
+            <Separator Grid.Row="1" />
+            <Grid Grid.Row="2" Margin="18" ColumnDefinitions="*, Auto">
+                <DataGrid
+                    SelectedItem="{Binding SelectedRelease}"
+                    Name="MyDataGrid" ItemsSource="{Binding Releases}"
+                    AutoGenerateColumns="False" IsVisible="{Binding !IsLoadingReleases}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Version" IsReadOnly="True" Width="*" Binding="{Binding TagName}"/>
+                        <DataGridTemplateColumn Header="Released">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding PublishedAt, StringFormat='{}{0:yyyy-MM-dd}'}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Type" IsReadOnly="True" Binding="{Binding Type}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel 
+                    Grid.Column="0" x:Name="Loader" Margin="18 4"
+                    IsVisible="{Binding IsLoadingReleases}"
+                    VerticalAlignment="Center">
+                    <TextBlock TextAlignment="Center" FontSize="24" FontWeight="Bold" Margin="0 0 0 16" Text="Loading releases, please wait..." />
+                    <ProgressBar IsIndeterminate="{Binding IsLoadingReleases}" Height="40" />
+                </StackPanel>
+                <StackPanel 
+                    Grid.Column="0" x:Name="ErrorViewer" Margin="18 4"
+                    IsVisible="{Binding IsError}"
+                    VerticalAlignment="Center">
+                    <TextBlock TextAlignment="Center" Text="{Binding ErrorMessage}" />
+                </StackPanel>
+                <DockPanel Margin="18 0 0 0" Width="150" Grid.Column="1">
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock Text="Filters:" Margin="0 0 0 4" />
+                        <CheckBox Content="Stable" />
+                        <CheckBox Content="RC" ToolTip.Tip="Release Candidate" />
+                        <CheckBox Content="Beta" />
+                        <CheckBox Content="Alpha" />
+                        <CheckBox Content="Dev" />
+                    </StackPanel>
+                    <Button 
+                        DockPanel.Dock="Bottom" Content="Refresh" VerticalAlignment="Bottom" 
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" />
+                </DockPanel>
+            </Grid>
+            <DockPanel Grid.Row="3">
+                <Separator DockPanel.Dock="Top" />
+                <StackPanel DockPanel.Dock="Bottom" HorizontalAlignment="Right" Orientation="Horizontal" Margin="8">
+                    <Button 
+                        Content="Save" Margin="0 0 4 0" IsDefault="True"
+                        Command="{Binding SaveCommand}" IsEnabled="{Binding CanBeSaved}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+                    <Button 
+                        Content="Cancel" IsCancel="True" 
+                        Command="{Binding CancelCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+                </StackPanel>
+            </DockPanel>
+        </Grid>
+    </Panel>
+</Window>

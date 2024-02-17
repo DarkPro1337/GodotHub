@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GodotHub.App", "GodotHub.App\GodotHub.App.csproj", "{68645D0F-C0C6-455C-8E61-0553AC1F3945}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GodotHub.Lib", "GodotHub.Lib\GodotHub.Lib.csproj", "{80D4E310-C317-41F6-852B-A0B4CEE98B74}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{68645D0F-C0C6-455C-8E61-0553AC1F3945}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68645D0F-C0C6-455C-8E61-0553AC1F3945}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68645D0F-C0C6-455C-8E61-0553AC1F3945}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68645D0F-C0C6-455C-8E61-0553AC1F3945}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80D4E310-C317-41F6-852B-A0B4CEE98B74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80D4E310-C317-41F6-852B-A0B4CEE98B74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80D4E310-C317-41F6-852B-A0B4CEE98B74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80D4E310-C317-41F6-852B-A0B4CEE98B74}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

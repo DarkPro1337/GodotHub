@@ -1,0 +1,89 @@
+<Window 
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:GodotHub.App.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="https://github.com/projektanker/icons.avalonia"
+    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+    x:Class="GodotHub.App.Views.MainWindow"
+    x:DataType="vm:MainWindowViewModel"
+    Icon="/Assets/GodotHub.ico"
+    Title="GodotHub" WindowStartupLocation="CenterScreen"
+    TransparencyLevelHint="AcrylicBlur"
+    Background="Transparent">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Panel>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="1"
+                    MaterialOpacity="0" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        
+        <Grid RowDefinitions="Auto, *, Auto">
+            <DockPanel Margin="4" VerticalAlignment="Top" Height="36">
+                <Button
+                    ToolTip.Tip="Add a new instance of Godot Engine."
+                    Height="32" Command="{Binding AddInstanceCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
+                    <DockPanel VerticalAlignment="Center" LastChildFill="True">
+                        <i:Icon DockPanel.Dock="Left" FontSize="20" Value="fa-square-plus" Margin="0 0 4 0" />
+                        <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Text="Add Instance" />
+                    </DockPanel>
+                </Button>
+                <Separator Width="1" Height="32" Margin="4 0" />
+                <DropDownButton>
+                    <DockPanel VerticalAlignment="Center" LastChildFill="True">
+                        <i:Icon DockPanel.Dock="Left" FontSize="20" Value="fa-folder-open" Margin="0 0 4 0" />
+                        <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Text="Folders" />
+                    </DockPanel>
+                    <DropDownButton.Flyout>
+                        <MenuFlyout>
+                            <MenuItem i:MenuItem.Icon="fa-folder" Header="View Instances Folder"/>
+                            <MenuItem i:MenuItem.Icon="fa-folder" Header="View Launcher Root Folder"/>
+                        </MenuFlyout>
+                    </DropDownButton.Flyout>
+                </DropDownButton>
+            
+                <Button Height="32" Margin="4 0">
+                    <DockPanel VerticalAlignment="Center" LastChildFill="True">
+                        <i:Icon DockPanel.Dock="Left" FontSize="20" Value="fa-gear" Margin="0 0 4 0" />
+                        <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Text="Settings" />
+                    </DockPanel>
+                </Button>
+            
+                <DropDownButton>
+                    <DockPanel VerticalAlignment="Center" LastChildFill="True">
+                        <i:Icon DockPanel.Dock="Left" FontSize="20" Value="fa-circle-question" Margin="0 0 4 0" />
+                        <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Text="Help" />
+                    </DockPanel>
+                    <DropDownButton.Flyout>
+                        <MenuFlyout>
+                            <MenuItem i:MenuItem.Icon="fa-broom" Header="Clear Cache"/>
+                            <MenuItem i:MenuItem.Icon="fa-bug" Header="Report a Bug"/>
+                            <MenuItem Header="-"/>
+                            <MenuItem i:MenuItem.Icon="fa-circle-info" Header="About GodotHub"/>
+                        </MenuFlyout>
+                    </DropDownButton.Flyout>
+                </DropDownButton>
+            </DockPanel>
+            <ScrollViewer Grid.Row="1">
+                <ItemsControl>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel HorizontalAlignment="Stretch" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Panel>
+</Window>
