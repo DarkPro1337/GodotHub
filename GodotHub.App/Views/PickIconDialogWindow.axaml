@@ -1,0 +1,74 @@
+﻿<Window 
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="clr-namespace:GodotHub.App.ViewModels"
+    xmlns:helpers="clr-namespace:GodotHub.App.Helpers"
+    x:Class="GodotHub.App.Views.PickIconDialogWindow"
+    mc:Ignorable="d" Width="700" Height="600"
+    WindowStartupLocation="CenterOwner"
+    CanResize="False"
+    Title="Pick Icon"
+    Icon="/Assets/GodotHub.ico"
+    TransparencyLevelHint="AcrylicBlur"
+    x:DataType="viewModels:PickIconDialogViewModel">
+    <Design.DataContext>
+        <viewModels:PickIconDialogViewModel />
+    </Design.DataContext>
+    <Window.Resources>
+        <helpers:FilePathToBitmapConverter x:Key="FilePathToBitmapConverter" />
+    </Window.Resources>
+    <Panel>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="1"
+                    MaterialOpacity="0" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        
+        <Grid RowDefinitions="*, Auto">
+            <ListBox
+                VerticalAlignment="Stretch" 
+                HorizontalAlignment="Stretch" 
+                ItemsSource="{Binding Icons}" 
+                SelectedItem="{Binding SelectedIcon}">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel HorizontalAlignment="Stretch" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical">
+                            <Image
+                                Source="{Binding Path, Converter={StaticResource FilePathToBitmapConverter}}"
+                                Margin="5" Width="88" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                            <TextBlock Text="{Binding Name}" Margin="5" TextAlignment="Center" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <DockPanel Margin="4" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Grid.Row="1">
+                <Button 
+                    DockPanel.Dock="Left" HorizontalAlignment="Left" 
+                    Margin="4 0" Content="Open icons folder"
+                    Command="{Binding  OpenIconsFolderCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+                <Button 
+                    DockPanel.Dock="Right" HorizontalAlignment="Right"
+                    Margin="4 0" Content="Cancel"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+                <Button 
+                    DockPanel.Dock="Right" HorizontalAlignment="Right"
+                    Margin="4 0" Content="Pick"
+                    Command="{Binding SelectIconCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+            </DockPanel>
+        </Grid>
+    </Panel>
+</Window>

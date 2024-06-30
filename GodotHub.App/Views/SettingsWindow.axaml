@@ -1,0 +1,81 @@
+﻿<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="clr-namespace:GodotHub.App.ViewModels"
+    xmlns:i="https://github.com/projektanker/icons.avalonia"
+    mc:Ignorable="d"
+    x:Class="GodotHub.App.Views.SettingsWindow"
+    Title="Settings"
+    Width="800" Height="650"
+    x:DataType="viewModels:SettingsViewModel"
+    WindowStartupLocation="CenterOwner"
+    Icon="/Assets/GodotHub.ico"
+    CanResize="False">
+    <Window.DataContext>
+        <viewModels:SettingsViewModel />
+    </Window.DataContext>
+    <Panel>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="1"
+                    MaterialOpacity="0" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+
+        <Grid ColumnDefinitions="200,*">
+            <ListBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <i:Icon Value="{Binding Icon}" FontSize="24" Margin="5" />
+                            <TextBlock Text="{Binding Title}" Margin="5" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <ListBox Grid.Column="1" ItemsSource="{Binding SelectedCategory.SettingsItems}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <ContentControl Content="{Binding}">
+                            <ContentControl.DataTemplates>
+                                <DataTemplate DataType="{x:Type viewModels:CheckBoxSettingsItem}">
+                                    <StackPanel Orientation="Horizontal" Margin="5">
+                                        <TextBlock Text="{Binding Label}" Margin="5" />
+                                        <CheckBox IsChecked="{Binding IsChecked}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type viewModels:TextBoxSettingsItem}">
+                                    <StackPanel Orientation="Horizontal" Margin="5">
+                                        <TextBlock Text="{Binding Label}" Margin="5" />
+                                        <TextBox Text="{Binding Text}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type viewModels:ComboBoxSettingsItem}">
+                                    <StackPanel Orientation="Horizontal" Margin="5">
+                                        <TextBlock Text="{Binding Label}" Margin="5" />
+                                        <ComboBox 
+                                            ItemsSource="{Binding Options}"
+                                            SelectedItem="{Binding SelectedOption}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type viewModels:IntegerSettingsItem}">
+                                    <StackPanel Orientation="Horizontal" Margin="5">
+                                        <TextBlock Text="{Binding Label}" Margin="5" />
+                                        <TextBox Text="{Binding Value}" Width="100" />
+                                        <TextBlock Text="{Binding Unit}" Margin="5" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ContentControl.DataTemplates>
+                        </ContentControl>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+    </Panel>
+</Window>

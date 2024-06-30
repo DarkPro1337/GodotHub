@@ -2,14 +2,16 @@
 
 namespace GodotHub.Lib;
 
+[Flags]
 public enum ReleaseType
 {
-    Stable,
-    ReleaseCandidate,
-    Beta,
-    Alpha,
-    Dev,
-    Unknown
+    None = 0,
+    Stable = 1 << 0,           // 1
+    ReleaseCandidate = 1 << 1, // 2
+    Beta = 1 << 2,             // 4
+    Alpha = 1 << 3,            // 8
+    Dev = 1 << 4,              // 16
+    Unknown = 1 << 5           // 32
 }
 
 public sealed record GodotRelease

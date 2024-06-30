@@ -6,15 +6,20 @@
     xmlns:av="clr-namespace:SpacedGridControl.Avalonia;assembly=SpacedGridControl.Avalonia"
     xmlns:viewModels="clr-namespace:GodotHub.App.ViewModels"
     xmlns:i="https://github.com/projektanker/icons.avalonia"
+    xmlns:helpers="clr-namespace:GodotHub.App.Helpers"
     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
     x:Class="GodotHub.App.Views.CreateInstanceWindow"
     Title="New Instance" Width="800" Height="650"
     WindowStartupLocation="CenterOwner" CanResize="False"
     TransparencyLevelHint="AcrylicBlur"
+    Icon="/Assets/GodotHub.ico"
     x:DataType="viewModels:CreateInstanceViewModel">
     <Design.DataContext>
         <viewModels:CreateInstanceViewModel/>
     </Design.DataContext>
+    <Window.Resources>
+        <helpers:FilePathToBitmapConverter x:Key="FilePathToBitmapConverter" />
+    </Window.Resources>
     <Panel>
         <ExperimentalAcrylicBorder IsHitTestVisible="False">
             <ExperimentalAcrylicBorder.Material>
@@ -29,31 +34,45 @@
         <Grid RowDefinitions="Auto, Auto, *, Auto">
             <DockPanel Margin="18" VerticalAlignment="Top">
                 <Button
+                    Command="{Binding OpenIconDialogCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
                     Margin="0 0 12 0"
                     Width="128" Height="128" 
                     DockPanel.Dock="Left">
-                    <Image Width="88" Height="88" />
+                    <Image 
+                        Width="88" Height="88" RenderOptions.BitmapInterpolationMode="HighQuality"
+                        Source="{Binding IconPath, Converter={StaticResource FilePathToBitmapConverter}}" />
                 </Button>
                 <av:SpacedGrid VerticalAlignment="Center" RowSpacing="8" RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="Auto, *">
                     <TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Text="Name: " />
-                    <TextBox Grid.Column="1" Grid.Row="0" Watermark="Release 4.0" />
+                    <TextBox 
+                        Grid.Column="1" Grid.Row="0"
+                        Watermark="{Binding NameWatermark}"
+                        Text="{Binding Name}" />
                     <TextBlock Grid.Column="0" Grid.Row="1"  VerticalAlignment="Center" Text="Group: " />
-                    <TextBox Grid.Column="1" Grid.Row="1" Watermark="No group" />
-                    <CheckBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Content="Mono (.NET)" />
+                    <AutoCompleteBox
+                        Grid.Column="1" Grid.Row="1" 
+                        Watermark="No group" Text="{Binding Group}" />
+                    <CheckBox
+                        Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2"
+                        Content="Mono (.NET)" IsChecked="{Binding IsMono}" />
                 </av:SpacedGrid>
             </DockPanel>
             <Separator Grid.Row="1" />
             <Grid Grid.Row="2" Margin="18" ColumnDefinitions="*, Auto">
                 <DataGrid
                     SelectedItem="{Binding SelectedRelease}"
-                    Name="MyDataGrid" ItemsSource="{Binding Releases}"
-                    AutoGenerateColumns="False" IsVisible="{Binding !IsLoadingReleases}">
+                    Name="MyDataGrid" ItemsSource="{Binding FilteredReleases}"
+                    AutoGenerateColumns="False" IsVisible="{Binding !IsLoadingReleases}"
+                    SelectionMode="Single" Focusable="False">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Version" IsReadOnly="True" Width="*" Binding="{Binding TagName}"/>
                         <DataGridTemplateColumn Header="Released">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding PublishedAt, StringFormat='{}{0:yyyy-MM-dd}'}"/>
+                                    <TextBlock 
+                                        VerticalAlignment="Center" TextAlignment="Center" 
+                                        Text="{Binding PublishedAt, StringFormat='{}{0:yyyy-MM-dd}'}"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -64,27 +83,32 @@
                     Grid.Column="0" x:Name="Loader" Margin="18 4"
                     IsVisible="{Binding IsLoadingReleases}"
                     VerticalAlignment="Center">
-                    <TextBlock TextAlignment="Center" FontSize="24" FontWeight="Bold" Margin="0 0 0 16" Text="Loading releases, please wait..." />
-                    <ProgressBar IsIndeterminate="{Binding IsLoadingReleases}" Height="40" />
+                    <TextBlock TextAlignment="Center" FontSize="24" FontWeight="Bold" Margin="0 0 0 16" Text="Fetching releases, please wait..." />
+                    <ProgressBar Height="32" IsIndeterminate="True" />
                 </StackPanel>
                 <StackPanel 
                     Grid.Column="0" x:Name="ErrorViewer" Margin="18 4"
                     IsVisible="{Binding IsError}"
                     VerticalAlignment="Center">
+                    <i:Icon Value="fa-triangle-exclamation" FontSize="24"/>
                     <TextBlock TextAlignment="Center" Text="{Binding ErrorMessage}" />
                 </StackPanel>
                 <DockPanel Margin="18 0 0 0" Width="150" Grid.Column="1">
                     <StackPanel DockPanel.Dock="Top">
                         <TextBlock Text="Filters:" Margin="0 0 0 4" />
-                        <CheckBox Content="Stable" />
-                        <CheckBox Content="RC" ToolTip.Tip="Release Candidate" />
-                        <CheckBox Content="Beta" />
-                        <CheckBox Content="Alpha" />
-                        <CheckBox Content="Dev" />
+                        <ItemsControl ItemsSource="{Binding Filters}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                     <Button 
                         DockPanel.Dock="Bottom" Content="Refresh" VerticalAlignment="Bottom" 
-                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" />
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                        Command="{Binding RefreshReleasesCommand}"
+                        IsEnabled="{Binding !IsLoadingReleases}"/>
                 </DockPanel>
             </Grid>
             <DockPanel Grid.Row="3">

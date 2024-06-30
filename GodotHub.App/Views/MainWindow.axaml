@@ -5,17 +5,23 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:i="https://github.com/projektanker/icons.avalonia"
+    xmlns:helpers="clr-namespace:GodotHub.App.Helpers"
     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
     x:Class="GodotHub.App.Views.MainWindow"
     x:DataType="vm:MainWindowViewModel"
     Icon="/Assets/GodotHub.ico"
     Title="GodotHub" WindowStartupLocation="CenterScreen"
     TransparencyLevelHint="AcrylicBlur"
-    Background="Transparent">
+    Background="Transparent"
+    Width="690" Height="580">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
+    
+    <Window.Resources>
+        <helpers:FilePathToBitmapConverter x:Key="FilePathToBitmapConverter" />
+    </Window.Resources>
 
     <Panel>
         <ExperimentalAcrylicBorder IsHitTestVisible="False">
@@ -47,13 +53,19 @@
                     </DockPanel>
                     <DropDownButton.Flyout>
                         <MenuFlyout>
-                            <MenuItem i:MenuItem.Icon="fa-folder" Header="View Instances Folder"/>
-                            <MenuItem i:MenuItem.Icon="fa-folder" Header="View Launcher Root Folder"/>
+                            <MenuItem
+                                i:MenuItem.Icon="fa-folder" Header="View Instances Folder" 
+                                Command="{Binding ViewInstancesFolderCommand}" />
+                            <MenuItem
+                                i:MenuItem.Icon="fa-folder" Header="View Launcher Root Folder"
+                                Command="{Binding ViewLauncherRootFolderCommand}" />
                         </MenuFlyout>
                     </DropDownButton.Flyout>
                 </DropDownButton>
             
-                <Button Height="32" Margin="4 0">
+                <Button 
+                    Height="32" Margin="4 0" Command="{Binding OpenSettingsCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
                     <DockPanel VerticalAlignment="Center" LastChildFill="True">
                         <i:Icon DockPanel.Dock="Left" FontSize="20" Value="fa-gear" Margin="0 0 4 0" />
                         <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Text="Settings" />
@@ -76,12 +88,25 @@
                 </DropDownButton>
             </DockPanel>
             <ScrollViewer Grid.Row="1">
-                <ItemsControl>
+                <ItemsControl ItemsSource="{Binding Instances}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel HorizontalAlignment="Stretch" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:InstanceViewModel}">
+                            <Border Margin="4" Width="100" Height="100" Background="Black" CornerRadius="4">
+                                <StackPanel>
+                                    <Image Source="{Binding IconPath, Converter={StaticResource FilePathToBitmapConverter}}" />
+                                    <TextBlock Text="{Binding Name}" />
+                                    <TextBlock Text="{Binding DownloadProgress}" />
+                                    <TextBlock Text="{Binding StatusMessage}" />
+                                    <Button Content="Execute" Command="{Binding ExecuteLaunch}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
         </Grid>
