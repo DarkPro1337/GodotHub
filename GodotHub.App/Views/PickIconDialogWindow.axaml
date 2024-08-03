@@ -32,9 +32,9 @@
         
         <Grid RowDefinitions="*, Auto">
             <ListBox
-                VerticalAlignment="Stretch" 
-                HorizontalAlignment="Stretch" 
-                ItemsSource="{Binding Icons}" 
+                VerticalAlignment="Stretch"
+                HorizontalAlignment="Stretch"
+                ItemsSource="{Binding Icons}"
                 SelectedItem="{Binding SelectedIcon}">
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -56,8 +56,7 @@
                 <Button 
                     DockPanel.Dock="Left" HorizontalAlignment="Left" 
                     Margin="4 0" Content="Open icons folder"
-                    Command="{Binding  OpenIconsFolderCommand}"
-                    CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+                    Command="{Binding  OpenIconsFolderCommand}" />
                 <Button 
                     DockPanel.Dock="Right" HorizontalAlignment="Right"
                     Margin="4 0" Content="Cancel"

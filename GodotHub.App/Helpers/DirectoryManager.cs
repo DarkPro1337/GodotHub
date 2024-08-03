@@ -38,6 +38,14 @@ public static class DirectoryManager
         return Path.Combine(GodotHubPath, "Instances");
     }
     
+    public static string GetInstancesCacheDirectory()
+    {
+        if (!Directory.Exists(Path.Combine(GodotHubPath, "Cache"))) 
+            Directory.CreateDirectory(Path.Combine(GodotHubPath, "Cache"));
+        
+        return Path.Combine(GodotHubPath, "Cache");
+    }
+    
     public static string GetIconsDirectory()
     {
         if (!Directory.Exists(Path.Combine(GodotHubPath, "Icons"))) 

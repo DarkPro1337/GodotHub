@@ -50,9 +50,13 @@ public class CreateInstanceViewModel : ViewModelBase
     public bool IsMono
     {
         get => _isMono;
-        set => this.RaiseAndSetIfChanged(ref _isMono, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isMono, value);
+            FilterReleases();
+        }
     }
-    
+
     public string ErrorMessage
     {
         get => _errorMessage;
@@ -91,12 +95,6 @@ public class CreateInstanceViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _selectedRelease, value);
             this.RaisePropertyChanged(nameof(CanBeSaved));
         }
-    }
-    
-    public ReleaseType SelectedReleaseTypes
-    {
-        get => _selectedReleaseTypes;
-        set => this.RaiseAndSetIfChanged(ref _selectedReleaseTypes, value);
     }
 
     public bool CanBeSaved => SelectedRelease != null && !IsLoadingReleases;
@@ -145,6 +143,9 @@ public class CreateInstanceViewModel : ViewModelBase
             IsError = false;
             IsLoadingReleases = true;
             var releases = await GodotApi.GetGitHubReleasesAsync();
+            // TODO: find a way to get releases for older versions of Godot
+            // There are can be releases without assets, so we need to replace them from other source
+            releases.RemoveAll(r => r.Assets.Count == 0); // For now, we just remove them
             Releases.Clear();
             Releases.AddRange(releases);
             FilterReleases();
@@ -177,7 +178,11 @@ public class CreateInstanceViewModel : ViewModelBase
         
         foreach (var release in Releases)
         {
-            if ((selectedTypes & release.Type) != 0) 
+            var shouldAdd = (selectedTypes & release.Type) != 0;
+            if (IsMono) 
+                shouldAdd = shouldAdd && release.Assets.Any(asset => asset.Name.Contains("mono"));
+
+            if (shouldAdd) 
                 FilteredReleases.Add(release);
         }
     }
@@ -185,7 +190,6 @@ public class CreateInstanceViewModel : ViewModelBase
     private async Task ExecuteOpenIconDialog(Window window)
     {
         var iconPicker = new PickIconDialogViewModel();
-        iconPicker.Initialize();
         var iconPickerWindow = new PickIconDialogWindow(iconPicker);
         var result = await iconPickerWindow.ShowDialog<bool>(window);
         if (result) 

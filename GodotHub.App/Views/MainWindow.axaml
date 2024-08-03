@@ -34,7 +34,7 @@
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
         
-        <Grid RowDefinitions="Auto, *, Auto">
+        <Grid x:Name="MainGrid" RowDefinitions="Auto, *, Auto">
             <DockPanel Margin="4" VerticalAlignment="Top" Height="36">
                 <Button
                     ToolTip.Tip="Add a new instance of Godot Engine."
@@ -79,10 +79,17 @@
                     </DockPanel>
                     <DropDownButton.Flyout>
                         <MenuFlyout>
-                            <MenuItem i:MenuItem.Icon="fa-broom" Header="Clear Cache"/>
-                            <MenuItem i:MenuItem.Icon="fa-bug" Header="Report a Bug"/>
+                            <MenuItem 
+                                i:MenuItem.Icon="fa-broom" Header="Clear Cache"
+                                Command="{Binding ClearCacheCommand}" />
+                            <MenuItem 
+                                i:MenuItem.Icon="fa-bug" Header="Report a Bug"
+                                Command="{Binding ReportBugCommand}"/>
                             <MenuItem Header="-"/>
-                            <MenuItem i:MenuItem.Icon="fa-circle-info" Header="About GodotHub"/>
+                            <MenuItem 
+                                i:MenuItem.Icon="fa-circle-info" Header="About GodotHub"
+                                Command="{Binding OpenAboutCommand}"
+                                CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
                         </MenuFlyout>
                     </DropDownButton.Flyout>
                 </DropDownButton>
@@ -96,15 +103,26 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type vm:InstanceViewModel}">
-                            <Border Margin="4" Width="100" Height="100" Background="Black" CornerRadius="4">
-                                <StackPanel>
-                                    <Image Source="{Binding IconPath, Converter={StaticResource FilePathToBitmapConverter}}" />
-                                    <TextBlock Text="{Binding Name}" />
-                                    <TextBlock Text="{Binding DownloadProgress}" />
-                                    <TextBlock Text="{Binding StatusMessage}" />
-                                    <Button Content="Execute" Command="{Binding ExecuteLaunch}" />
-                                </StackPanel>
-                            </Border>
+                            <Button Margin="4" Command="{Binding LaunchCommand}">
+                                <Border Margin="4" Width="100" Height="100" CornerRadius="4">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image Width="64" Source="{Binding IconPath, Converter={StaticResource FilePathToBitmapConverter}}" />
+                                        <TextBlock TextAlignment="Center" Text="{Binding Name}" />
+                                    </StackPanel>
+                                </Border>
+                                <Button.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem
+                                            i:MenuItem.Icon="fa-pen-to-square" Header="Edit Instance"
+                                            Command="{Binding EditCommand}"
+                                            CommandParameter="{Binding ElementName=MainGrid, Path=DataContext}" />
+                                        <MenuItem
+                                            i:MenuItem.Icon="fa-trash" Header="Delete Instance" 
+                                            Command="{Binding DeleteCommand}"
+                                            CommandParameter="{Binding ElementName=MainGrid, Path=DataContext}" />
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
