@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="GodotHub.Core/GodotHub.Core.csproj" />
+  <Project Path="GodotHub.Core.Tests/GodotHub.Core.Tests.csproj" />
+  <Project Path="GodotHub.Desktop/GodotHub.Desktop.csproj" />
+</Solution>

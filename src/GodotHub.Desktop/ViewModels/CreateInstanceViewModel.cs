@@ -1,0 +1,188 @@
+﻿using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using GodotHub.Core.Models;
+using GodotHub.Core.Services;
+using GodotHub.Desktop.Helpers;
+using NLog;
+
+namespace GodotHub.Desktop.ViewModels;
+
+public partial class CreateInstanceViewModel : ViewModelBase
+{
+    private static readonly ILogger _logger = LoggingHelper.CreateLogger<CreateInstanceViewModel>();
+    private static readonly HttpClient _httpClient = new();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanBeSaved))]
+    [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
+    private bool _isLoadingReleases;
+
+    [ObservableProperty]
+    private bool _isError;
+
+    [ObservableProperty]
+    private bool _isMono;
+
+    [ObservableProperty]
+    private string _errorMessage = "Something went wrong.";
+
+    [ObservableProperty]
+    private string _nameWatermark = "Name";
+
+    [ObservableProperty]
+    private string _name = string.Empty;
+
+    [ObservableProperty]
+    private string _group = string.Empty;
+
+    [ObservableProperty]
+    private string _iconPath =
+        DirectoryManager.GetDefaultIconPath() ?? string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanBeSaved))]
+    [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
+    private GodotRelease? _selectedRelease;
+
+    public bool CanBeSaved =>
+        SelectedRelease is not null &&
+        !IsLoadingReleases;
+
+    public ObservableCollection<GodotRelease> Releases { get; } = [];
+
+    public ObservableCollection<GodotRelease> FilteredReleases { get; } = [];
+
+    public ObservableCollection<FilterItem> Filters { get; } =
+    [
+        new()
+        {
+            Type = GodotReleaseChannel.Stable,
+            Name = "Stable",
+            IsChecked = true
+        },
+        new()
+        {
+            Type = GodotReleaseChannel.ReleaseCandidate,
+            Name = "RC"
+        },
+        new()
+        {
+            Type = GodotReleaseChannel.Beta,
+            Name = "Beta"
+        },
+        new()
+        {
+            Type = GodotReleaseChannel.Alpha,
+            Name = "Alpha"
+        },
+        new()
+        {
+            Type = GodotReleaseChannel.Dev,
+            Name = "Dev"
+        }
+    ];
+
+    public CreateInstanceViewModel()
+    {
+        foreach (var filter in Filters)
+            filter.PropertyChanged += OnFilterPropertyChanged;
+
+        FilterReleases();
+    }
+
+    public Task InitializeAsync()
+    {
+        return LoadReleasesAsync();
+    }
+
+    partial void OnIsMonoChanged(bool value)
+    {
+        FilterReleases();
+    }
+
+    private void OnFilterPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(FilterItem.IsChecked))
+            FilterReleases();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanBeSaved))]
+    private static void Save(Window owner) => owner.Close(true);
+
+    [RelayCommand]
+    private static void Cancel(Window owner) => owner.Close();
+
+    [RelayCommand]
+    private Task RefreshReleasesAsync() => LoadReleasesAsync();
+
+    [RelayCommand]
+    private async Task OpenIconDialogAsync(Window owner)
+    {
+        // var iconPicker = new PickIconDialogViewModel();
+        // var iconPickerWindow = new PickIconDialogWindow(iconPicker);
+        //
+        // var result = await iconPickerWindow.ShowDialog<bool>(owner);
+        //
+        // if (result)
+        //     IconPath = iconPicker.SelectedIcon?.Path ?? string.Empty;
+    }
+
+    private async Task LoadReleasesAsync()
+    {
+        try
+        {
+            _logger.Trace("Fetching releases");
+
+            IsError = false;
+            IsLoadingReleases = true;
+
+            var releaseProvider = new GodotReleaseProvider(_httpClient);
+            var releases = await releaseProvider.GetReleasesAsync();
+            _logger.Trace("Fetched {0} releases", releases.Count);
+
+            Releases.Clear();
+
+            foreach (var release in releases)
+                Releases.Add(release);
+
+            FilterReleases();
+        }
+        catch (Exception exception)
+        {
+            IsError = true;
+            ErrorMessage = "Something went wrong while fetching the releases. Please try again later.";
+            _logger.Error(exception, "Error while fetching releases");
+        }
+        finally
+        {
+            IsLoadingReleases = false;
+        }
+    }
+
+    private void FilterReleases()
+    {
+        FilteredReleases.Clear();
+
+        foreach (var release in Releases)
+        {
+            FilteredReleases.Add(release);
+        }
+    }
+}
+
+public sealed partial class FilterItem : ObservableObject
+{
+    [ObservableProperty]
+    private bool _isChecked;
+
+    public GodotReleaseChannel Type { get; init; }
+
+    public string Name { get; init; } = string.Empty;
+}
