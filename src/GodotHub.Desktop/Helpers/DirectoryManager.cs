@@ -10,37 +10,18 @@ public static class DirectoryManager
 {
     private const string AppName = "GodotHub";
 
-    private static readonly ILogger _logger =
-        LogManager.GetCurrentClassLogger();
+    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
     private static readonly string _rootDirectory = Path.Combine(
-        Environment.GetFolderPath(
-            Environment.SpecialFolder.LocalApplicationData),
-        AppName);
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
 
-    private static readonly string _instancesDirectory =
-        Path.Combine(_rootDirectory, "Instances");
+    private static readonly string _instancesDirectory = Path.Combine(_rootDirectory, "Instances");
+    private static readonly string _cacheDirectory = Path.Combine(_rootDirectory, "Cache");
+    private static readonly string _iconsDirectory = Path.Combine(_rootDirectory, "Icons");
 
-    private static readonly string _cacheDirectory =
-        Path.Combine(_rootDirectory, "Cache");
-
-    private static readonly string _iconsDirectory =
-        Path.Combine(_rootDirectory, "Icons");
-
-    public static string GetInstancesDirectory()
-    {
-        return EnsureDirectory(_instancesDirectory);
-    }
-
-    public static string GetInstancesCacheDirectory()
-    {
-        return EnsureDirectory(_cacheDirectory);
-    }
-
-    public static string GetIconsDirectory()
-    {
-        return EnsureDirectory(_iconsDirectory);
-    }
+    public static string GetInstancesDirectory() => EnsureDirectory(_instancesDirectory);
+    public static string GetInstancesCacheDirectory() => EnsureDirectory(_cacheDirectory);
+    public static string GetIconsDirectory() => EnsureDirectory(_iconsDirectory);
 
     public static string EnsureInstanceDirectory(string instanceName)
     {
@@ -66,13 +47,8 @@ public static class DirectoryManager
                 .ToArray())
             .TrimEnd('.', ' ');
 
-        if (string.IsNullOrWhiteSpace(safeName) ||
-            safeName is "." or "..")
-        {
-            throw new ArgumentException(
-                "Instance name cannot be converted to a valid directory name.",
-                nameof(instanceName));
-        }
+        if (string.IsNullOrWhiteSpace(safeName) || safeName is "." or "..")
+            throw new ArgumentException("Instance name cannot be converted to a valid directory name.", nameof(instanceName));
 
         return safeName;
     }
@@ -81,10 +57,7 @@ public static class DirectoryManager
     {
         if (!Directory.Exists(directoryPath))
         {
-            _logger.Warn(
-                "Directory {DirectoryPath} does not exist",
-                directoryPath);
-
+            _logger.Warn("Directory {DirectoryPath} does not exist", directoryPath);
             return false;
         }
 
@@ -98,13 +71,9 @@ public static class DirectoryManager
 
             return true;
         }
-        catch (Exception exception)
+        catch (Exception ex)
         {
-            _logger.Error(
-                exception,
-                "Failed to open directory {DirectoryPath}",
-                directoryPath);
-
+            _logger.Error(ex, "Failed to open directory {DirectoryPath}", directoryPath);
             return false;
         }
     }
@@ -112,21 +81,12 @@ public static class DirectoryManager
     public static string GetFileNameFromUrl(string url)
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
-        {
-            throw new ArgumentException(
-                "The value must be a valid absolute URL.",
-                nameof(url));
-        }
+            throw new ArgumentException("The value must be a valid absolute URL.", nameof(url));
 
-        var fileName = Path.GetFileName(
-            Uri.UnescapeDataString(uri.AbsolutePath));
+        var fileName = Path.GetFileName(Uri.UnescapeDataString(uri.AbsolutePath));
 
         if (string.IsNullOrWhiteSpace(fileName))
-        {
-            throw new ArgumentException(
-                "The URL does not contain a file name.",
-                nameof(url));
-        }
+            throw new ArgumentException("The URL does not contain a file name.", nameof(url));
 
         return fileName;
     }
