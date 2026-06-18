@@ -77,21 +77,6 @@ public static class DirectoryManager
         return safeName;
     }
 
-    public static string? GetDefaultIconPath()
-    {
-        var iconsDirectory = GetIconsDirectory();
-        var defaultIconPath = Path.Combine(
-            iconsDirectory,
-            "default.png");
-
-        if (File.Exists(defaultIconPath))
-            return defaultIconPath;
-
-        return Directory
-            .EnumerateFiles(iconsDirectory)
-            .FirstOrDefault();
-    }
-
     public static bool OpenDirectory(string directoryPath)
     {
         if (!Directory.Exists(directoryPath))

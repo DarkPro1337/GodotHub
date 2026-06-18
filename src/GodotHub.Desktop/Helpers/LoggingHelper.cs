@@ -9,13 +9,11 @@ namespace GodotHub.Desktop.Helpers;
 public static class LoggingHelper
 {
     private const string LogLayout =
-        "[${longdate}] ${level:uppercase=true:padding=-5}" +
-        "[${logger}] ${message} ${exception:format=tostring}";
+        "[${longdate}] ${level:uppercase=true:padding=-5} " +
+        "[${logger}]  ${message} ${exception:format=tostring}";
 
     public static string LogsDirectory { get; } = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "GodotHub",
-        "Logs");
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GodotHub", "Logs");
 
     public static void Initialize()
     {

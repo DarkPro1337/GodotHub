@@ -47,10 +47,6 @@ public partial class CreateInstanceViewModel : ViewModelBase
     private string _group = string.Empty;
 
     [ObservableProperty]
-    private string _iconPath =
-        DirectoryManager.GetDefaultIconPath() ?? string.Empty;
-
-    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanBeSaved))]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     private GodotRelease? _selectedRelease;
@@ -104,18 +100,6 @@ public partial class CreateInstanceViewModel : ViewModelBase
 
     [RelayCommand]
     private Task RefreshReleasesAsync() => LoadReleasesAsync();
-
-    [RelayCommand]
-    private async Task OpenIconDialogAsync(Window owner)
-    {
-        // var iconPicker = new PickIconDialogViewModel();
-        // var iconPickerWindow = new PickIconDialogWindow(iconPicker);
-        //
-        // var result = await iconPickerWindow.ShowDialog<bool>(owner);
-        //
-        // if (result)
-        //     IconPath = iconPicker.SelectedIcon?.Path ?? string.Empty;
-    }
 
     private async Task LoadReleasesAsync()
     {

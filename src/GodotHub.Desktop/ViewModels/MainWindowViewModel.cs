@@ -32,7 +32,7 @@ public partial class MainWindowViewModel : ViewModelBase
         await new CreateInstanceWindow(createInstanceViewModel).ShowDialog(owner);
         if (createInstanceViewModel.SelectedRelease != null)
         {
-            _logger.Info("Selected release: {0}", createInstanceViewModel.SelectedRelease);
+            _logger.Info("Selected release: {Release} for instance {Name}", createInstanceViewModel.SelectedRelease, createInstanceViewModel.Name);
         }
     }
 
