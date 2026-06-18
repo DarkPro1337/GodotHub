@@ -11,8 +11,6 @@ public partial class MainWindow : Window
 {
     private static readonly ILogger _logger = LoggingHelper.CreateLogger<MainWindow>();
 
-    public ObservableCollection<InstanceViewModel> Instances { get; } = [];
-
     public MainWindow()
     {
         InitializeComponent();

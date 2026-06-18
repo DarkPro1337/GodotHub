@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GodotHub.Core.Contracts;
 using GodotHub.Core.Models;
 using GodotHub.Core.Services;
 using GodotHub.Desktop.Helpers;
@@ -18,6 +20,8 @@ public partial class CreateInstanceViewModel : ViewModelBase
 {
     private static readonly ILogger _logger = LoggingHelper.CreateLogger<CreateInstanceViewModel>();
     private static readonly HttpClient _httpClient = new();
+    private readonly IGodotReleaseProvider _releaseProvider = new GodotReleaseProvider(_httpClient);
+    private int _filterRequestId;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanBeSaved))]
@@ -61,32 +65,11 @@ public partial class CreateInstanceViewModel : ViewModelBase
 
     public ObservableCollection<FilterItem> Filters { get; } =
     [
-        new()
-        {
-            Type = GodotReleaseChannel.Stable,
-            Name = "Stable",
-            IsChecked = true
-        },
-        new()
-        {
-            Type = GodotReleaseChannel.ReleaseCandidate,
-            Name = "RC"
-        },
-        new()
-        {
-            Type = GodotReleaseChannel.Beta,
-            Name = "Beta"
-        },
-        new()
-        {
-            Type = GodotReleaseChannel.Alpha,
-            Name = "Alpha"
-        },
-        new()
-        {
-            Type = GodotReleaseChannel.Dev,
-            Name = "Dev"
-        }
+        new() { Type = GodotReleaseChannel.Stable, Name = "Stable", IsChecked = true },
+        new() { Type = GodotReleaseChannel.ReleaseCandidate, Name = "RC" },
+        new() { Type = GodotReleaseChannel.Beta, Name = "Beta" },
+        new() { Type = GodotReleaseChannel.Alpha, Name = "Alpha" },
+        new() { Type = GodotReleaseChannel.Dev, Name = "Dev" }
     ];
 
     public CreateInstanceViewModel()
@@ -94,7 +77,7 @@ public partial class CreateInstanceViewModel : ViewModelBase
         foreach (var filter in Filters)
             filter.PropertyChanged += OnFilterPropertyChanged;
 
-        FilterReleases();
+        _ = FilterReleasesAsync();
     }
 
     public Task InitializeAsync()
@@ -104,13 +87,13 @@ public partial class CreateInstanceViewModel : ViewModelBase
 
     partial void OnIsMonoChanged(bool value)
     {
-        FilterReleases();
+        _ = FilterReleasesAsync();
     }
 
     private void OnFilterPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(FilterItem.IsChecked))
-            FilterReleases();
+            _ = FilterReleasesAsync();
     }
 
     [RelayCommand(CanExecute = nameof(CanBeSaved))]
@@ -143,8 +126,7 @@ public partial class CreateInstanceViewModel : ViewModelBase
             IsError = false;
             IsLoadingReleases = true;
 
-            var releaseProvider = new GodotReleaseProvider(_httpClient);
-            var releases = await releaseProvider.GetReleasesAsync();
+            var releases = await _releaseProvider.GetReleasesAsync();
             _logger.Trace("Fetched {0} releases", releases.Count);
 
             Releases.Clear();
@@ -152,7 +134,7 @@ public partial class CreateInstanceViewModel : ViewModelBase
             foreach (var release in releases)
                 Releases.Add(release);
 
-            FilterReleases();
+            await FilterReleasesAsync();
         }
         catch (Exception exception)
         {
@@ -166,14 +148,38 @@ public partial class CreateInstanceViewModel : ViewModelBase
         }
     }
 
-    private void FilterReleases()
+    private async Task FilterReleasesAsync()
     {
-        FilteredReleases.Clear();
+        var requestId = ++_filterRequestId;
+        var selectedChannels = Filters
+            .Where(filter => filter.IsChecked)
+            .Select(filter => filter.Type)
+            .ToHashSet();
+
+        var buildKind = IsMono ? GodotBuildKind.DotNet : GodotBuildKind.Standard;
+        var filteredReleases = new List<GodotRelease>();
 
         foreach (var release in Releases)
         {
-            FilteredReleases.Add(release);
+            if (!selectedChannels.Contains(release.Channel))
+                continue;
+
+            if (buildKind == GodotBuildKind.DotNet)
+            {
+                var downloads = await _releaseProvider.GetDownloadsAsync(release, buildKind);
+                if (downloads.Count == 0)
+                    continue;
+            }
+
+            filteredReleases.Add(release);
         }
+
+        if (requestId != _filterRequestId)
+            return;
+
+        FilteredReleases.Clear();
+        foreach (var release in filteredReleases)
+            FilteredReleases.Add(release);
     }
 }
 

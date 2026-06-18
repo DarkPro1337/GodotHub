@@ -11,9 +11,7 @@ internal sealed record GodotReleaseKey(IReadOnlyList<int> VersionParts, GodotRel
         key = new GodotReleaseKey([], GodotReleaseChannel.Unknown, null);
 
         if (string.IsNullOrWhiteSpace(value))
-        {
             return false;
-        }
 
         var parts = value.Split('-', 2, StringSplitOptions.TrimEntries);
         var versionText = parts[0];
@@ -23,17 +21,13 @@ internal sealed record GodotReleaseKey(IReadOnlyList<int> VersionParts, GodotRel
         foreach (var part in versionText.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
             if (!int.TryParse(part, NumberStyles.Integer, CultureInfo.InvariantCulture, out var versionPart))
-            {
                 return false;
-            }
 
             versionParts.Add(versionPart);
         }
 
         if (versionParts.Count == 0)
-        {
             return false;
-        }
 
         var (channel, channelNumber) = GodotReleaseNameParser.Parse(releaseName);
         key = new GodotReleaseKey(versionParts, channel, channelNumber);
@@ -43,9 +37,7 @@ internal sealed record GodotReleaseKey(IReadOnlyList<int> VersionParts, GodotRel
     public static GodotReleaseKey FromRelease(string version, string releaseName)
     {
         if (!TryParse($"{version}-{releaseName}", out var key))
-        {
             throw new ArgumentException($"Invalid Godot release identifier '{version}-{releaseName}'.");
-        }
 
         return key;
     }
@@ -53,9 +45,7 @@ internal sealed record GodotReleaseKey(IReadOnlyList<int> VersionParts, GodotRel
     public int CompareTo(GodotReleaseKey? other)
     {
         if (other is null)
-        {
             return 1;
-        }
 
         var maxLength = Math.Max(VersionParts.Count, other.VersionParts.Count);
         for (var i = 0; i < maxLength; i++)
@@ -64,16 +54,12 @@ internal sealed record GodotReleaseKey(IReadOnlyList<int> VersionParts, GodotRel
             var right = i < other.VersionParts.Count ? other.VersionParts[i] : 0;
             var versionComparison = left.CompareTo(right);
             if (versionComparison != 0)
-            {
                 return versionComparison;
-            }
         }
 
         var channelComparison = GetChannelOrder(Channel).CompareTo(GetChannelOrder(other.Channel));
         if (channelComparison != 0)
-        {
             return channelComparison;
-        }
 
         return (ChannelNumber ?? 0).CompareTo(other.ChannelNumber ?? 0);
     }

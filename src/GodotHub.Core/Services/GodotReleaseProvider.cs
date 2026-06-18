@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using GodotHub.Core.Contracts;
 using GodotHub.Core.Internal;
 using GodotHub.Core.Models;
 using YamlDotNet.Serialization;
@@ -51,23 +52,17 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
 
         var metadata = await GetMetadataAsync(cancellationToken).ConfigureAwait(false);
         if (!GodotReleaseKey.TryParse($"{release.Version}-{release.Name}", out var releaseKey))
-        {
             return [];
-        }
 
-        var config = metadata.DownloadConfig.Resolve(releaseKey);
+        var config = metadata.DownloadConfigIndex.Resolve(releaseKey);
         if (config is null)
-        {
             return [];
-        }
 
         if (buildKind == GodotBuildKind.DotNet)
         {
             config = config.Mono;
             if (config is null)
-            {
                 return [];
-            }
         }
 
         return CreateArtifacts(release, buildKind, config);
@@ -76,24 +71,16 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
     public Uri CreateDownloadUrl(string version, string releaseName, string platform, string slug)
     {
         if (string.IsNullOrWhiteSpace(version))
-        {
             throw new ArgumentException("Version is required.", nameof(version));
-        }
 
         if (string.IsNullOrWhiteSpace(releaseName))
-        {
             throw new ArgumentException("Release name is required.", nameof(releaseName));
-        }
 
         if (string.IsNullOrWhiteSpace(platform))
-        {
             throw new ArgumentException("Platform is required.", nameof(platform));
-        }
 
         if (string.IsNullOrWhiteSpace(slug))
-        {
             throw new ArgumentException("Slug is required.", nameof(slug));
-        }
 
         var query = string.Join(
             '&',
@@ -102,26 +89,19 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
             $"slug={Uri.EscapeDataString(slug)}",
             $"platform={Uri.EscapeDataString(platform)}");
 
-        return new UriBuilder("https", "downloads.godotengine.org")
-        {
-            Query = query
-        }.Uri;
+        return new UriBuilder("https", "downloads.godotengine.org") { Query = query }.Uri;
     }
 
     private async Task<MetadataCache> GetMetadataAsync(CancellationToken cancellationToken)
     {
         if (_metadataCache is { } cached)
-        {
             return cached;
-        }
 
         await _metadataLock.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
             if (_metadataCache is { } lockedCached)
-            {
                 return lockedCached;
-            }
 
             var versionsJson = await FetchStringAsync(_versionsUri, cancellationToken).ConfigureAwait(false);
             var downloadConfigYaml = await FetchStringAsync(_downloadConfigsUri, cancellationToken).ConfigureAwait(false);
@@ -189,15 +169,11 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
     private static GodotVersion? ParseVersion(JsonElement element)
     {
         if (element.ValueKind != JsonValueKind.Object)
-        {
             return null;
-        }
 
         var versionName = GetString(element, "name", "version");
         if (string.IsNullOrWhiteSpace(versionName))
-        {
             return null;
-        }
 
         var releases = new List<GodotRelease>();
         if (TryGetProperty(element, "releases", out var releasesElement) && releasesElement.ValueKind == JsonValueKind.Array)
@@ -205,18 +181,13 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
             foreach (var releaseElement in releasesElement.EnumerateArray())
             {
                 var release = ParseRelease(versionName, releaseElement);
-                if (release is not null)
-                {
-                    releases.Add(release);
-                }
+                if (release is not null) releases.Add(release);
             }
         }
 
         var topLevelReleaseName = GetString(element, "release_name", "releaseName", "flavor", "flavour");
         if (releases.Count == 0 && !string.IsNullOrWhiteSpace(topLevelReleaseName))
-        {
             releases.Add(CreateRelease(versionName, topLevelReleaseName, element));
-        }
 
         return new GodotVersion(versionName, releases);
     }
@@ -232,9 +203,7 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
         }
 
         if (element.ValueKind != JsonValueKind.Object)
-        {
             return null;
-        }
 
         var releaseName = GetString(element, "name", "release_name", "releaseName", "flavor", "flavour");
         return string.IsNullOrWhiteSpace(releaseName)
@@ -257,9 +226,7 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
     private static DateOnly? TryParseDate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
-        {
             return null;
-        }
 
         string[] formats = ["d MMMM yyyy", "dd MMMM yyyy", "d MMM yyyy", "dd MMM yyyy", "yyyy-MM-dd"];
         return DateOnly.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var exact)
@@ -276,21 +243,15 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
     private static string? GetString(JsonElement element, params string[] names)
     {
         if (element.ValueKind == JsonValueKind.String)
-        {
             return element.GetString();
-        }
 
         if (element.ValueKind != JsonValueKind.Object)
-        {
             return null;
-        }
 
         foreach (var name in names)
         {
             if (TryGetProperty(element, name, out var property) && property.ValueKind == JsonValueKind.String)
-            {
                 return property.GetString();
-            }
         }
 
         return null;
@@ -316,9 +277,7 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
         var deserializer = new DeserializerBuilder().Build();
         var root = deserializer.Deserialize<Dictionary<object, object?>>(yaml);
         if (root is null)
-        {
             throw new GodotReleaseProviderException("Godot download configuration was empty.");
-        }
 
         var defaults = new Dictionary<int, DownloadConfig>();
         if (TryGetMap(root, "defaults", out var defaultsMap))
@@ -326,9 +285,7 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
             foreach (var (key, value) in defaultsMap)
             {
                 if (TryParseIntKey(key, out var majorVersion) && value is Dictionary<object, object?> configMap)
-                {
                     defaults[majorVersion] = ParseConfig(configMap);
-                }
             }
         }
 
@@ -339,9 +296,7 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
             {
                 var parsedOverride = ParseOverride(overrideItem);
                 if (parsedOverride is not null)
-                {
                     overrides.Add(parsedOverride);
-                }
             }
         }
 
@@ -351,20 +306,14 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
     private static DownloadConfigOverride? ParseOverride(Dictionary<object, object?> map)
     {
         if (!TryGetScalar(map, "version", out var versionText) || !int.TryParse(versionText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var version))
-        {
             return null;
-        }
 
         if (!TryGetList(map, "range", out var range) || range.Count < 2)
-        {
             return null;
-        }
 
         if (!GodotReleaseKey.TryParse(Convert.ToString(range[0], CultureInfo.InvariantCulture) ?? string.Empty, out var from)
             || !GodotReleaseKey.TryParse(Convert.ToString(range[1], CultureInfo.InvariantCulture) ?? string.Empty, out var to))
-        {
             return null;
-        }
 
         var hasConfigValue = TryGetValue(map, "config", out var rawConfig);
         var configMap = rawConfig as Dictionary<object, object?> ?? [];
@@ -434,9 +383,7 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
     private static Dictionary<string, string> GetStringMap(Dictionary<object, object?> map, string key)
     {
         if (!TryGetMap(map, key, out var child))
-        {
             return [];
-        }
 
         return child
             .Select(pair => new
@@ -512,7 +459,7 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
     private sealed record MetadataCache(
         IReadOnlyList<GodotVersion> Versions,
         IReadOnlyList<GodotRelease> Releases,
-        GodotDownloadConfigIndex DownloadConfig);
+        GodotDownloadConfigIndex DownloadConfigIndex);
 
     private sealed class GodotDownloadConfigIndex(
         IReadOnlyDictionary<int, DownloadConfig> defaults,
@@ -525,14 +472,10 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
 
             var matchedOverride = overrides.FirstOrDefault(item => item.Matches(majorVersion, releaseKey));
             if (matchedOverride is null)
-            {
                 return defaultConfig;
-            }
 
             if (matchedOverride.ClearsDefaults)
-            {
                 return matchedOverride.Config;
-            }
 
             return defaultConfig is null
                 ? matchedOverride.Config
@@ -584,9 +527,7 @@ public sealed class GodotReleaseProvider : IGodotReleaseProvider
         {
             var merged = new Dictionary<string, string>(current, StringComparer.OrdinalIgnoreCase);
             foreach (var (key, value) in overlay)
-            {
                 merged[key] = value;
-            }
 
             return merged;
         }

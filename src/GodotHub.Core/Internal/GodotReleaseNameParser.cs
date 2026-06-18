@@ -8,15 +8,11 @@ internal static class GodotReleaseNameParser
     public static (GodotReleaseChannel Channel, int? Number) Parse(string releaseName)
     {
         if (string.Equals(releaseName, "stable", StringComparison.OrdinalIgnoreCase))
-        {
             return (GodotReleaseChannel.Stable, null);
-        }
 
         var prefixLength = releaseName.TakeWhile(char.IsLetter).Count();
         if (prefixLength == 0)
-        {
             return (GodotReleaseChannel.Unknown, null);
-        }
 
         var prefix = releaseName[..prefixLength].ToLowerInvariant();
         var numberText = releaseName[prefixLength..];

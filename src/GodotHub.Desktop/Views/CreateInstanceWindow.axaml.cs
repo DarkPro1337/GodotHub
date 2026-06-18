@@ -1,11 +1,15 @@
 ﻿using System;
 using Avalonia.Controls;
+using GodotHub.Desktop.Helpers;
 using GodotHub.Desktop.ViewModels;
+using NLog;
 
 namespace GodotHub.Desktop.Views;
 
 public partial class CreateInstanceWindow : Window
 {
+    private static readonly ILogger _logger = LoggingHelper.CreateLogger<MainWindow>();
+
     public CreateInstanceWindow()
     {
         InitializeComponent();
@@ -24,18 +28,13 @@ public partial class CreateInstanceWindow : Window
             base.OnOpened(e);
 
             if (DataContext is not CreateInstanceViewModel viewModel)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(CreateInstanceWindow)} requires " +
-                    $"{nameof(CreateInstanceViewModel)} as its DataContext.");
-            }
+                return;
 
             await viewModel.InitializeAsync();
         }
-        catch (Exception exception)
+        catch (Exception ex)
         {
-            Console.WriteLine(exception);
-            throw;
+            _logger.Error(ex, "Failed to initialize create instance window");
         }
     }
 }
