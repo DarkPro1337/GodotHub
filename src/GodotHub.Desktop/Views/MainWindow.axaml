@@ -112,40 +112,66 @@
                     </DropDownButton.Flyout>
                 </DropDownButton>
             </DockPanel>
-            <!-- <ScrollViewer Grid.Row="1"> -->
-            <!--     <ItemsControl ItemsSource="{Binding Instances}"> -->
-            <!--         <ItemsControl.ItemsPanel> -->
-            <!--             <ItemsPanelTemplate> -->
-            <!--                 <WrapPanel HorizontalAlignment="Stretch" /> -->
-            <!--             </ItemsPanelTemplate> -->
-            <!--         </ItemsControl.ItemsPanel> -->
-            <!--         <ItemsControl.ItemTemplate> -->
-            <!--             <DataTemplate DataType="{x:Type vm:InstanceViewModel}"> -->
-            <!--                 <Button Margin="4" Command="{Binding LaunchCommand}"> -->
-            <!--                     <Border Margin="4" Width="100" Height="100" CornerRadius="4"> -->
-            <!--                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"> -->
-            <!--                             <Image Width="64" -->
-            <!--                                    Source="{Binding IconPath, Converter={StaticResource FilePathToBitmapConverter}}" /> -->
-            <!--                             <TextBlock TextAlignment="Center" Text="{Binding Name}" /> -->
-            <!--                         </StackPanel> -->
-            <!--                     </Border> -->
-            <!--                     <Button.ContextMenu> -->
-            <!--                         <ContextMenu> -->
-            <!--                             <MenuItem -->
-            <!--                                 i:MenuItem.Icon="mdi-pencil" Header="Edit Instance" -->
-            <!--                                 Command="{Binding EditCommand}" -->
-            <!--                                 CommandParameter="{Binding ElementName=MainGrid, Path=DataContext}" /> -->
-            <!--                             <MenuItem -->
-            <!--                                 i:MenuItem.Icon="mdi-trash-can" Header="Delete Instance" -->
-            <!--                                 Command="{Binding DeleteCommand}" -->
-            <!--                                 CommandParameter="{Binding ElementName=MainGrid, Path=DataContext}" /> -->
-            <!--                         </ContextMenu> -->
-            <!--                     </Button.ContextMenu> -->
-            <!--                 </Button> -->
-            <!--             </DataTemplate> -->
-            <!--         </ItemsControl.ItemTemplate> -->
-            <!--     </ItemsControl> -->
-            <!-- </ScrollViewer> -->
+            <ScrollViewer Grid.Row="1" Margin="12 4 12 12">
+                <ItemsControl ItemsSource="{Binding Instances}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel HorizontalAlignment="Stretch" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:InstanceViewModel}">
+                            <Button
+                                Width="200"
+                                Height="96"
+                                Margin="4"
+                                Padding="10"
+                                HorizontalContentAlignment="Stretch"
+                                Command="{Binding LaunchCommand}">
+                                <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto, Auto">
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        Text="{Binding Name}"
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        TextTrimming="CharacterEllipsis" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        Text="{Binding Version}"
+                                        Opacity="0.75"
+                                        TextTrimming="CharacterEllipsis" />
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Grid.Column="0"
+                                        Text="{Binding BuildKind}"
+                                        Opacity="0.75" />
+                                    <i:Icon
+                                        Grid.Row="2"
+                                        Grid.Column="1"
+                                        FontSize="22"
+                                        Value="mdi-play-circle" />
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <DockPanel Grid.Row="2" Margin="12 0 12 12">
+                <ProgressBar
+                    DockPanel.Dock="Left"
+                    Width="160"
+                    Height="8"
+                    Margin="0 0 8 0"
+                    IsIndeterminate="True"
+                    IsVisible="{Binding IsInstallingInstance}" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Text="{Binding StatusMessage}"
+                    TextTrimming="CharacterEllipsis" />
+            </DockPanel>
         </Grid>
     </Panel>
 </Window>

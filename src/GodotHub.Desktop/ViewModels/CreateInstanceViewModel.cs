@@ -51,9 +51,16 @@ public partial class CreateInstanceViewModel : ViewModelBase
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     private GodotRelease? _selectedRelease;
 
-    public bool CanBeSaved =>
-        SelectedRelease is not null &&
-        !IsLoadingReleases;
+    partial void OnNameChanged(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return;
+
+        OnPropertyChanged(nameof(CanBeSaved));
+        SaveCommand.NotifyCanExecuteChanged();
+    }
+
+    public bool CanBeSaved => SelectedRelease is not null && !IsLoadingReleases && !string.IsNullOrWhiteSpace(Name);
 
     public ObservableCollection<GodotRelease> Releases { get; } = [];
 
